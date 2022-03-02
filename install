@@ -1,2 +1,11 @@
 #/bin/bash
 
+function gdinstall {
+    if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+        env=${HOME}/.zshrc
+    elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+        env=${HOME}/.bashrc
+    else
+        echo "Now only support bash and zsh shell."
+    fi
+}
