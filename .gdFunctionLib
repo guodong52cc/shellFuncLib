@@ -1,0 +1,134 @@
+# Guodong's Shell Function Libraries
+# Adaptation to Linux(bash) and MacOS(zsh)
+# How to use:
+#   export [this file]
+# Eg:
+#   export .gdFunctionLib 
+# Run gdinstall to source into system environment variables
+
+function gdinstall {
+    if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+        env=${HOME}/.zshrc
+    elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+        env=${HOME}/.bashrc
+    else
+        echo "Now only support bash and zsh shell."
+    fi
+}
+
+function color()
+{
+    case $1 in
+    black) aaa=30;;
+    red) aaa=31;;
+    green) aaa=32;;
+    yellow) aaa=33;;
+    blue) aaa=34;;
+    purple) aaa=35;;
+    skyblue) aaa=36;;
+    white) aaa=37;;
+    help) echo -e "usage: color [black/red/green/yellow/blue/purple/skybule/white] \"[color message]\" \"[nomal message]\""
+    echo -e "Eg:\t color red \"Erro:\" \"please check!\"";;
+    *) color red "Erro parameters,check please!";;
+    esac
+    echo -e "\033[$aaa"m"$2\033[0m$3"
+}
+
+function gitpush() {
+
+	targetDirectory="/Users/guodong/OneDrive/笔记/gd520.cc"
+	httpProxy="http://127.0.0.1:10809"
+	httpsProxy="http://127.0.0.1:10809"
+	allProxy="socks5://127.0.0.1:10808"
+	softwareName="v2ray"
+	softwarePort="10809"
+	softwarePID=$(ps -ef | grep $softwareName | grep -v grep | awk '{print $2}' | sort -u)
+	portName=$(lsof -i :$softwarePort | awk 'NR>1{print $1}' | sort -u)
+	portPID=$(lsof -i :$softwarePort | awk 'NR>1{print $2}' | sort -u)
+	currentDirectory=`pwd`
+
+	if [[ $1 == "CHECK" ]];then
+		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
+		echo "\033[34mGit Directory: \033[0m$targetDirectory"
+		echo "\033[34mProxy Name: \033[0m$softwareName"
+		echo "\033[34mProxy Port: \033[0m$softwarePort"
+		echo "\033[34mProxy $softwareName PID: \033[0m$softwarePID"
+		echo "\033[34mNow Port $softwarePort Name: \033[0m$portName"
+		echo "\033[34mNow Port $softwarePort PID: \033[0m$portPID"
+		echo "\033[34mHttp Proxy: \033[0m$httpProxy"
+		echo "\033[34mHttps Proxy: \033[0m$httpsProxy"
+		echo "\033[34mSocks Proxy: \033[0m$allProxy"
+	elif [[ $1 == "PROXY" ]];then
+		echo "\033[34mhttp_proxy: \033[0m$http_proxy"
+		echo "\033[34mhttps_proxy: \033[0m$https_proxy"
+		echo "\033[34mALL_PROXY: \033[0m$ALL_PROXY"
+	elif [[ $1 == "CLEAN" ]];then
+		unset http_proxy
+		unset https_proxy
+		unset ALL_PROXY
+	elif [[ $1 == "HELP" ]];then
+		echo "Usage: gdpush [COMMAND]"
+		echo "[COMMAND]:"
+		echo -e "\t [message] : Git commit -m \"[message]\"."
+		echo -e "\t CHECK : Check config parameters information."
+		echo -e "\t PROXY : Check system terminal proxy information."
+		echo -e "\t HELP : Show command help."
+	else
+		if [[ $portPID == $softwarePID ]];then
+			echo -e "\033[31m\n$softwareName Proxy Software Not Runing! \n\033[0m"
+		else
+			if [[ $http_proxy != $httpProxy ]];then
+				export http_proxy=$httpProxy
+			fi
+			if [[ $https_proxy != $httpsProxy ]];then
+				export https_proxy=$httpsProxy
+			fi
+			if [[ $ALL_PROXY != $allProxy ]];then
+				export ALL_PROXY=$allProxy
+			fi
+			echo "Proxy done."
+		fi
+
+		while [ ! $1 ]
+		do
+			read '1?git commit -m : '
+			if [ ! $1 ];then
+				echo "Cannot get parameters!"
+			fi
+		done
+
+		if [[ $currentDirectory = $targetDirectory ]];then
+			echo "Already in $targetDirectory\n"
+		else
+			cd $targetDirectory
+			echo "Into Directory:"
+			pwd
+			echo 
+		fi
+
+		if [[ $portName =~ $softwareName ]];then
+			git add .
+			git commit -m "$1"
+			git push
+			cd $currentDirectory
+		else
+			if [[ $inputs == "y" ]];then
+				git add .
+				git commit -m "$1"
+				git push
+				cd $currentDirectory
+			else
+				read 'inputs?Please check proxy,if you wish to ignore,input y: '
+				if [[ $inputs == "y" ]];then
+					unset inputs
+					git add .
+					git commit -m "$1"
+					git push
+					cd $currentDirectory
+				else
+					cd $currentDirectory
+				fi
+			fi
+		fi
+	fi
+}
