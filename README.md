@@ -42,13 +42,13 @@ git clone https://github.com/guodong52cc/shellFuncLib.git
 ```
 cd shellFuncLib
 chmod +x install
-. install
+. ./install
 ```
 
 3. uninstall
 
 ```shell
 chmod +x unintall
-. unintall
+. ./uninstall
 ```
 

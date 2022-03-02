@@ -1,0 +1,23 @@
+#/bin/bash
+
+function uninstall {
+    if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+        env=${HOME}/.zshrc
+    elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+        env=${HOME}/.bashrc
+    else
+        echo "Now only support bash and zsh shell."
+    fi
+
+    if grep -q "source ${HOME}/shellFuncLib/gdFuncLib" $env;then
+        sed -i "s/source ${HOME}\/shellFuncLib\/gdFuncLib//g" $env
+        source $env
+        echo "OK."
+        echo -e "If you want clear file , you can delet \"shellFuncLib\" file"
+    else
+        echo "Cannot find gdFuncLib in environment"
+        echo -e "If you want clear file , you can delet \"shellFuncLib\" file"
+    fi
+}
+
+uninstall

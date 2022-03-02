@@ -1,6 +1,6 @@
 #/bin/bash
 
-function gdinstall {
+function install {
     if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
         env=${HOME}/.zshrc
     elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
@@ -8,4 +8,14 @@ function gdinstall {
     else
         echo "Now only support bash and zsh shell."
     fi
+
+    if grep -q "source ${HOME}/shellFuncLib/gdFuncLib" $env;then
+        echo "Already exist."
+    else
+        echo "source ${HOME}/shellFuncLib/gdFuncLib" >> $env
+        source $env
+        echo "OK"
+    fi
 }
+
+install

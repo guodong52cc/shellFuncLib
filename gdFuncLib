@@ -4,17 +4,6 @@
 #   export [this file]
 # Eg:
 #   export .gdFunctionLib 
-# Run gdinstall to source into system environment variables
-
-function gdinstall {
-    if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
-        env=${HOME}/.zshrc
-    elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
-        env=${HOME}/.bashrc
-    else
-        echo "Now only support bash and zsh shell."
-    fi
-}
 
 function color()
 {
