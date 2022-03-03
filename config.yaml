@@ -1,0 +1,21 @@
+# Instruction
+# proxy.softwareName          :name of proxy name
+# proxy.softwareHttpPort      :http and https port of proxy software
+# proxy.softwareSocks5Port    :sock5 port of proxy software
+# Git_type                    :marks for git
+# Git_gitDirectory            :directory of git repository
+
+#Proxy
+proxy:
+  softwareName: v2ray
+	softwareHttpPort: 10809
+  softwareSocks5Port: 10808
+
+#Git:
+gd:
+  type: git
+  gitDirectory: /Users/guodong/OneDrive/笔记/gd520.cc
+
+sfl:
+  type: git
+  gitDirectory: /Users/guodong/shellFuncLib

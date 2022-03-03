@@ -1,0 +1,104 @@
+# 请勿手动修改该文件，尤其是git.mod
+# Please do not modify this file manually, especially git.mod
+
+function gitpush() {
+	if [ -e $GFL_FOLDER/config.yaml ];then
+		eval $(parse_yaml $GFL_FOLDER/config.yaml)
+	else
+		color red "Erro: Please confirm if the file exists : " "$GFL_FOLDER/config.yaml"
+		return 1
+	fi
+    
+	httpProxy="http://127.0.0.1:$proxy_softwareHttpPort"
+	httpsProxy="http://127.0.0.1:$proxy_softwareHttpPort"
+	allProxy="socks5://127.0.0.1:$proxy_softwareSocksPort"
+	softwarePID=$(ps -ef | grep $proxy_softwareName | grep -v grep | awk '{print $2}' | sort -u)
+	portName=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $1}' | sort -u)
+	portPID=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $2}' | sort -u)
+	currentDirectory=`pwd`
+
+	if [[ $1 == "CHECK" ]];then
+		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
+		echo "\033[34mGit Directory: \033[0m$git_gitDirectory"
+		echo "\033[34mProxy Name: \033[0m$proxy_softwareName"
+		echo "\033[34mProxy Port: \033[0m$proxy_softwareHttpPort"
+		echo "\033[34mProxy $proxy_softwareName PID: \033[0m$softwarePID"
+		echo "\033[34mNow Port $proxy_softwareHttpPort Name: \033[0m$portName"
+		echo "\033[34mNow Port $proxy_softwareHttpPort PID: \033[0m$portPID"
+		echo "\033[34mHttp Proxy: \033[0m$httpProxy"
+		echo "\033[34mHttps Proxy: \033[0m$httpsProxy"
+		echo "\033[34mSocks Proxy: \033[0m$allProxy"
+	elif [[ $1 == "PROXY" ]];then
+		echo "\033[34mhttp_proxy: \033[0m$http_proxy"
+		echo "\033[34mhttps_proxy: \033[0m$https_proxy"
+		echo "\033[34mALL_PROXY: \033[0m$ALL_PROXY"
+	elif [[ $1 == "CLEAN" ]];then
+		unset http_proxy
+		unset https_proxy
+		unset ALL_PROXY
+	elif [[ $1 == "HELP" ]];then
+		echo "Usage: gitpush [COMMAND]"
+		echo "[COMMAND]:"
+		echo -e "\t [message] : Git commit -m \"[message]\"."
+		echo -e "\t CHECK : Check config parameters information."
+		echo -e "\t PROXY : Check system terminal proxy information."
+		echo -e "\t HELP : Show command help."
+	else
+		if [[ $portPID == $softwarePID ]];then
+			echo -e "\033[31m\n$proxy_softwareName Proxy Software Not Runing! \n\033[0m"
+		else
+			if [[ $http_proxy != $httpProxy ]];then
+				export http_proxy=$httpProxy
+			fi
+			if [[ $https_proxy != $httpsProxy ]];then
+				export https_proxy=$httpsProxy
+			fi
+			if [[ $ALL_PROXY != $allProxy ]];then
+				export ALL_PROXY=$allProxy
+			fi
+			echo "Proxy done."
+		fi
+
+		while [ ! $1 ]
+		do
+			read '1?git commit -m : '
+			if [ ! $1 ];then
+				echo "Cannot get parameters!"
+			fi
+		done
+
+		if [[ $currentDirectory = $git_gitDirectory ]];then
+			echo "Already in $git_gitDirectory\n"
+		else
+			cd $git_gitDirectory
+			echo "Into Directory:"
+			pwd
+			echo 
+		fi
+
+		if [[ $portName =~ $proxy_softwareName ]];then
+			git add .
+			git commit -m "$1"
+			git push
+			cd $currentDirectory
+		else
+			if [[ $inputs == "y" ]];then
+				git add .
+				git commit -m "$1"
+				git push
+				cd $currentDirectory
+			else
+				read 'inputs?Please check proxy,if you wish to ignore,input y: '
+				if [[ $inputs == "y" ]];then
+					unset inputs
+					git add .
+					git commit -m "$1"
+					git push
+					cd $currentDirectory
+				else
+					cd $currentDirectory
+				fi
+			fi
+		fi
+	fi
+}

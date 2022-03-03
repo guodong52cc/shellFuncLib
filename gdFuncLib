@@ -23,101 +23,87 @@ function color()
     echo -e "\033[$aaa"m"$2\033[0m$3"
 }
 
-function gitpush() {
+function parse_yaml {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
 
-	targetDirectory="/Users/guodong/OneDrive/笔记/gd520.cc"
-	httpProxy="http://127.0.0.1:10809"
-	httpsProxy="http://127.0.0.1:10809"
-	allProxy="socks5://127.0.0.1:10808"
-	softwareName="v2ray"
-	softwarePort="10809"
-	softwarePID=$(ps -ef | grep $softwareName | grep -v grep | awk '{print $2}' | sort -u)
-	portName=$(lsof -i :$softwarePort | awk 'NR>1{print $1}' | sort -u)
-	portPID=$(lsof -i :$softwarePort | awk 'NR>1{print $2}' | sort -u)
-	currentDirectory=`pwd`
-
-	if [[ $1 == "CHECK" ]];then
-		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
-		echo "\033[34mGit Directory: \033[0m$targetDirectory"
-		echo "\033[34mProxy Name: \033[0m$softwareName"
-		echo "\033[34mProxy Port: \033[0m$softwarePort"
-		echo "\033[34mProxy $softwareName PID: \033[0m$softwarePID"
-		echo "\033[34mNow Port $softwarePort Name: \033[0m$portName"
-		echo "\033[34mNow Port $softwarePort PID: \033[0m$portPID"
-		echo "\033[34mHttp Proxy: \033[0m$httpProxy"
-		echo "\033[34mHttps Proxy: \033[0m$httpsProxy"
-		echo "\033[34mSocks Proxy: \033[0m$allProxy"
-	elif [[ $1 == "PROXY" ]];then
-		echo "\033[34mhttp_proxy: \033[0m$http_proxy"
-		echo "\033[34mhttps_proxy: \033[0m$https_proxy"
-		echo "\033[34mALL_PROXY: \033[0m$ALL_PROXY"
-	elif [[ $1 == "CLEAN" ]];then
-		unset http_proxy
-		unset https_proxy
-		unset ALL_PROXY
-	elif [[ $1 == "HELP" ]];then
-		echo "Usage: gdpush [COMMAND]"
-		echo "[COMMAND]:"
-		echo -e "\t [message] : Git commit -m \"[message]\"."
-		echo -e "\t CHECK : Check config parameters information."
-		echo -e "\t PROXY : Check system terminal proxy information."
-		echo -e "\t HELP : Show command help."
+function gitfunc {
+	if [ -e $GFL_FOLDER/config.yaml ];then
+		eval $(parse_yaml $GFL_FOLDER/config.yaml)
 	else
-		if [[ $portPID == $softwarePID ]];then
-			echo -e "\033[31m\n$softwareName Proxy Software Not Runing! \n\033[0m"
+		color red "Erro: Please confirm if the file exists : " "$GFL_FOLDER/config.yaml"
+		return 1
+	fi
+
+	if [[ $1 == "-a" ]];then
+		color yellow "All git souce file :"
+		color yellow "No.\tName"
+		gitfile=$(ls -al $GFL_FOLDER/git | awk 'NR>3{print $9}' | grep -v "git.mod")
+		if [ ! $gitfile ];then
+			echo "None file"
 		else
-			if [[ $http_proxy != $httpProxy ]];then
-				export http_proxy=$httpProxy
-			fi
-			if [[ $https_proxy != $httpsProxy ]];then
-				export https_proxy=$httpsProxy
-			fi
-			if [[ $ALL_PROXY != $allProxy ]];then
-				export ALL_PROXY=$allProxy
-			fi
-			echo "Proxy done."
+			echo $gitfile | while read line
+			do
+			i=0
+			color yellow "$((i+1))" "\t$line" 
+			done
+		fi
+	elif [[ $1 == "update" ]];then
+	    if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+			env=${HOME}/.zshrc
+		elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+			env=${HOME}/.bashrc
+		else
+			echo "Now only support bash and zsh shell."
 		fi
 
-		while [ ! $1 ]
+		gitname=$(parse_yaml $GFL_FOLDER/config.yaml | grep "type=\"git\"" | awk -F '_' '{print $1}')
+		gitfile=$(ls -al $GFL_FOLDER/git | awk 'NR>3{print $9}' | grep -v "git.mod")
+
+		gitExt=$(echo $gitfile | grep -xv "$gitname")
+		echo $gitExt | while read line
 		do
-			read '1?git commit -m : '
-			if [ ! $1 ];then
-				echo "Cannot get parameters!"
-			fi
+		rm $GFL_FOLDER/git/$line
 		done
 
-		if [[ $currentDirectory = $targetDirectory ]];then
-			echo "Already in $targetDirectory\n"
-		else
-			cd $targetDirectory
-			echo "Into Directory:"
-			pwd
-			echo 
-		fi
-
-		if [[ $portName =~ $softwareName ]];then
-			git add .
-			git commit -m "$1"
-			git push
-			cd $currentDirectory
-		else
-			if [[ $inputs == "y" ]];then
-				git add .
-				git commit -m "$1"
-				git push
-				cd $currentDirectory
+		if [ -e $GFL_FOLDER/git/git.mod ];then
+			echo $gitname | while read line
+			do
+			cat $GFL_FOLDER/git/git.mod | sed -e "s/gitpush/$line"push"/g" -e "s/git_gitDirectory/"$line"_"$line"Directory/g" > $GFL_FOLDER/git/$line
+			if grep -q "source $GFL_FOLDER/gdFuncLib/git/$line" $env;then
+				echo "Already exist."
 			else
-				read 'inputs?Please check proxy,if you wish to ignore,input y: '
-				if [[ $inputs == "y" ]];then
-					unset inputs
-					git add .
-					git commit -m "$1"
-					git push
-					cd $currentDirectory
-				else
-					cd $currentDirectory
-				fi
+				echo "source $GFL_FOLDER/gdFuncLib/git/$line" >> $env
+				source $env
+				echo "OK"
 			fi
+			done
+		else
+			color red "Cannot find git.mod"
+			return 1
 		fi
+	elif [[ $1 == "help" ]];then
+		echo "Usage : gitfunc [command]"
+		echo "[command] :"
+		echo -e "-a :\t List all git source file"
+		echo -e "update :\t Check and update git command from config into git file"
+		echo -e "help :\t Information for command gitfunc"
+	else
+		color red "Unsupported options !"
+		gitfunc help
 	fi
 }
+

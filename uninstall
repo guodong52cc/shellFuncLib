@@ -9,10 +9,10 @@ function uninstall {
         echo "Now only support bash and zsh shell."
     fi
 
-    if grep -q "source ${HOME}/shellFuncLib/gdFuncLib" $env;then
-        sed -i "s/source ${HOME}\/shellFuncLib\/gdFuncLib//g" $env
-        source $env
-        echo "OK."
+    if grep -q "gdFuncLib" $env;then
+        sed -i '/GFL_FOLDER/d' $env
+        sed -i '/gdFuncLib/d' $env
+        echo "OK"
         echo -e "If you want clear file , you can delet \"shellFuncLib\" file"
     else
         echo "Cannot find gdFuncLib in environment"

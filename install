@@ -9,10 +9,21 @@ function install {
         echo "Now only support bash and zsh shell."
     fi
 
-    if grep -q "source ${HOME}/shellFuncLib/gdFuncLib" $env;then
+    GFL_FOLDER=$(cd "$(dirname "$0")";pwd)
+    
+    if grep -q "GFL_FOLDER" $env;then
+        sed -i '/GFL_FOLDER/d' $env
+        echo "GFL_FOLDER=$GFL_FOLDER" >> $env
+        source $env
+    else
+        echo "GFL_FOLDER=$GFL_FOLDER" >> $env
+        source $env
+    fi    
+
+    if grep -q "source $GFL_FOLDER/gdFuncLib" $env;then
         echo "Already exist."
     else
-        echo "source ${HOME}/shellFuncLib/gdFuncLib" >> $env
+        echo "source $GFL_FOLDER/gdFuncLib" >> $env
         source $env
         echo "OK"
     fi

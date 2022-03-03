@@ -16,7 +16,11 @@ git push
 gdpush [message]
 ```
 
-> Now only support one git address ,  Multi-address will support later.
+Use:
+```shell
+# add your git into config.yaml
+gitfunc update
+```
 
 2. Easier color output
 
