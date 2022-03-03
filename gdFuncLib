@@ -101,6 +101,9 @@ function gitfunc {
 		echo -e "-a :\t List all git source file"
 		echo -e "update :\t Check and update git command from config into git file"
 		echo -e "help :\t Information for command gitfunc"
+	elif [ ! $1 ];then
+		color red "Miss options"
+		gitfunc help
 	else
 		color red "Unsupported options !"
 		gitfunc help
