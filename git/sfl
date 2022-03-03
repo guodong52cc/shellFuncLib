@@ -44,7 +44,7 @@ function sflpush() {
 		echo -e "\t PROXY : Check system terminal proxy information."
 		echo -e "\t HELP : Show command help."
 	else
-		if [[ $portPID == $softwarePID ]];then
+		if [[ $portPID != $softwarePID ]];then
 			echo -e "\033[31m\n$proxy_softwareName Proxy Software Not Runing! \n\033[0m"
 		else
 			if [[ $http_proxy != $httpProxy ]];then
