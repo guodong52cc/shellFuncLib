@@ -74,22 +74,68 @@ function gitfunc {
 		gitfile=$(ls -al $GFL_FOLDER/git | awk 'NR>3{print $9}' | grep -v "git.mod")
 
 		gitExt=$(echo $gitfile | grep -xv "$gitname")
-		echo $gitExt | while read line
-		do
-		rm $GFL_FOLDER/git/$line
-		done
+		if [ ! $gitEx ];then
+			echo $gitExt | while read line
+			do
+			rm $GFL_FOLDER/git/$line
+			done
+			echo "Git file check over"
+		else
+			echo "Git file check done"
+		fi
 
 		if [ -e $GFL_FOLDER/git/git.mod ];then
 			echo $gitname | while read line
 			do
 			cat $GFL_FOLDER/git/git.mod | sed -e "s/gitpush/$line"push"/g" -e "s/git_gitDirectory/"$line"_"$line"Directory/g" > $GFL_FOLDER/git/$line
-			if grep -q "source $GFL_FOLDER/gdFuncLib/git/$line" $env;then
-				echo "Already exist."
+			echo "Add $GFL_FOLDER/git/$line ... Done"			
+			if grep -q "source $GFL_FOLDER/git/$line" $env;then
+				echo "Already exist : source $GFL_FOLDER/git/$line."
 			else
-				echo "source $GFL_FOLDER/gdFuncLib/git/$line" >> $env
-				source $env
-				echo "OK"
+				echo "source $GFL_FOLDER/git/$line" >> $env
+				echo "Add source $GFL_FOLDER/git/$line ... Done"
 			fi
+			source $GFL_FOLDER/git/$line
+			done
+		else
+			color red "Cannot find git.mod"
+			return 1
+		fi
+	elif [[ $1 == "reupdate" ]];then
+	    if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+			env=${HOME}/.zshrc
+		elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+			env=${HOME}/.bashrc
+		else
+			echo "Now only support bash and zsh shell."
+		fi
+
+		gitname=$(parse_yaml $GFL_FOLDER/config.yaml | grep "type=\"git\"" | awk -F '_' '{print $1}')
+		gitfile=$(ls -al $GFL_FOLDER/git | awk 'NR>3{print $9}' | grep -v "git.mod")
+
+		if [ ! $gitEx ];then
+			echo $gitfile | while read line
+			do
+			rm $GFL_FOLDER/git/$line
+			echo "rm $GFL_FOLDER/git/$line"
+			done
+			echo "All clean"
+		else
+			echo "All done"
+		fi
+
+		if [ -e $GFL_FOLDER/git/git.mod ];then
+			echo $gitname | while read line
+			do
+			cat $GFL_FOLDER/git/git.mod | sed -e "s/gitpush/$line"push"/g" -e "s/git_gitDirectory/"$line"_gitDirectory/g" > $GFL_FOLDER/git/$line
+			echo "Add $GFL_FOLDER/git/$line ... Done"
+			if grep -q "source $GFL_FOLDER/git/$line" $env;then
+				echo "Already exist : source $GFL_FOLDER/git/$line."
+			else
+				echo "source $GFL_FOLDER/git/$line" >> $env
+				echo "Add source $GFL_FOLDER/git/$line ... Done"
+			fi
+			source $GFL_FOLDER/git/$line
 			done
 		else
 			color red "Cannot find git.mod"
@@ -98,9 +144,10 @@ function gitfunc {
 	elif [[ $1 == "help" ]];then
 		echo "Usage : gitfunc [command]"
 		echo "[command] :"
-		echo -e "-a :\t List all git source file"
-		echo -e "update :\t Check and update git command from config into git file"
-		echo -e "help :\t Information for command gitfunc"
+		echo -e "\t-a :\t\t List all git source file"
+		echo -e "\tupdate :\t Check and update git command from config into git file"
+		echo -e "\treupdate :\t Check rebuild and update git command from config into git file"
+		echo -e "\thelp :\t\t Information for command gitfunc"
 	elif [ ! $1 ];then
 		color red "Miss options"
 		gitfunc help

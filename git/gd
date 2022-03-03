@@ -1,7 +1,7 @@
 # 请勿手动修改该文件，尤其是git.mod
 # Please do not modify this file manually, especially git.mod
 
-function gitpush() {
+function gdpush() {
 	if [ -e $GFL_FOLDER/config.yaml ];then
 		eval $(parse_yaml $GFL_FOLDER/config.yaml)
 	else
@@ -19,7 +19,7 @@ function gitpush() {
 
 	if [[ $1 == "CHECK" ]];then
 		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
-		echo "\033[34mGit Directory: \033[0m$git_gitDirectory"
+		echo "\033[34mGit Directory: \033[0m$gd_gitDirectory"
 		echo "\033[34mProxy Name: \033[0m$proxy_softwareName"
 		echo "\033[34mProxy Port: \033[0m$proxy_softwareHttpPort"
 		echo "\033[34mProxy $proxy_softwareName PID: \033[0m$softwarePID"
@@ -37,7 +37,7 @@ function gitpush() {
 		unset https_proxy
 		unset ALL_PROXY
 	elif [[ $1 == "HELP" ]];then
-		echo "Usage: gitpush [COMMAND]"
+		echo "Usage: gdpush [COMMAND]"
 		echo "[COMMAND]:"
 		echo -e "\t [message] : Git commit -m \"[message]\"."
 		echo -e "\t CHECK : Check config parameters information."
@@ -67,10 +67,10 @@ function gitpush() {
 			fi
 		done
 
-		if [[ $currentDirectory = $git_gitDirectory ]];then
-			echo "Already in $git_gitDirectory\n"
+		if [[ $currentDirectory = $gd_gitDirectory ]];then
+			echo "Already in $gd_gitDirectory\n"
 		else
-			cd $git_gitDirectory
+			cd $gd_gitDirectory
 			echo "Into Directory:"
 			pwd
 			echo 
