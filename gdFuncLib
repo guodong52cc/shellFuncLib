@@ -161,3 +161,36 @@ function ipv4()
 {
 	ifconfig | grep inet | grep -v inet6
 }
+
+function proxy()
+{
+	if [ -e $GFL_FOLDER/config.yaml ];then
+		eval $(parse_yaml $GFL_FOLDER/config.yaml)
+
+		httpProxy="http://127.0.0.1:$proxy_softwareHttpPort"
+		httpsProxy="http://127.0.0.1:$proxy_softwareHttpPort"
+		allProxy="socks5://127.0.0.1:$proxy_softwareSocks5Port"
+		softwarePID=$(ps -ef | grep $proxy_softwareName | grep -v grep | awk '{print $2}' | sort -u)
+		portName=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $1}' | sort -u)
+		portPID=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $2}' | sort -u)
+
+		if [[ $portPID != $softwarePID ]];then
+			echo -e "\033[31m\n$proxy_softwareName Proxy Software Not Runing! \n\033[0m"
+		else
+			if [[ $http_proxy != $httpProxy ]];then
+				export http_proxy=$httpProxy
+			fi
+			if [[ $https_proxy != $httpsProxy ]];then
+				export https_proxy=$httpsProxy
+			fi
+			if [[ $ALL_PROXY != $allProxy ]];then
+				export ALL_PROXY=$allProxy
+			fi
+			echo "Proxy done."
+		fi
+	else
+		color red "Erro: Please confirm if the file exists : " "$GFL_FOLDER/config.yaml"
+		return 1
+	fi
+
+}
