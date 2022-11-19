@@ -16,10 +16,11 @@ function gdpush() {
 	portName=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $1}' | sort -u)
 	portPID=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $2}' | sort -u)
 	currentDirectory=`pwd`
+	useProxy="ture"
 
 	if [[ $1 == "CHECK" ]];then
 		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
-		echo "\033[34mGit Directory: \033[0m$gd_gitDirectory"
+		echo "\033[34mGit Directory: \033[0m$gd_gdDirectory"
 		echo "\033[34mProxy Name: \033[0m$proxy_softwareName"
 		echo "\033[34mProxy Port: \033[0m$proxy_softwareHttpPort"
 		echo "\033[34mProxy $proxy_softwareName PID: \033[0m$softwarePID"
@@ -36,6 +37,32 @@ function gdpush() {
 		unset http_proxy
 		unset https_proxy
 		unset ALL_PROXY
+	elif [[ $1 == "unproxy" ]];then
+		while [ ! $2 ]
+		do
+			read '1?git commit -m : '
+			if [ ! $2 ];then
+				color red "Cannot get parameters!"
+				color red "press any key exit terminal"
+				read -n 1
+				exit 1
+			fi
+		done
+
+		if [[ $currentDirectory = $gd_gdDirectory ]];then
+			echo "Already in $gd_gdDirectory\n"
+		else
+			cd $gd_gdDirectory
+			echo "Into Directory:"
+			pwd
+			echo 
+		fi
+
+		git add .
+		git commit -m "$2"
+		git push
+		cd $currentDirectory
+
 	elif [[ $1 == "HELP" ]];then
 		echo "Usage: gdpush [COMMAND]"
 		echo "[COMMAND]:"
@@ -67,10 +94,10 @@ function gdpush() {
 			fi
 		done
 
-		if [[ $currentDirectory = $gd_gitDirectory ]];then
-			echo "Already in $gd_gitDirectory\n"
+		if [[ $currentDirectory = $gd_gdDirectory ]];then
+			echo "Already in $gd_gdDirectory\n"
 		else
-			cd $gd_gitDirectory
+			cd $gd_gdDirectory
 			echo "Into Directory:"
 			pwd
 			echo 

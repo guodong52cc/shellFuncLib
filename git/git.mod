@@ -16,6 +16,7 @@ function gitpush() {
 	portName=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $1}' | sort -u)
 	portPID=$(lsof -i :$proxy_softwareHttpPort | awk 'NR>1{print $2}' | sort -u)
 	currentDirectory=`pwd`
+	useProxy="ture"
 
 	if [[ $1 == "CHECK" ]];then
 		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
@@ -36,6 +37,32 @@ function gitpush() {
 		unset http_proxy
 		unset https_proxy
 		unset ALL_PROXY
+	elif [[ $1 == "unproxy" ]];then
+		while [ ! $2 ]
+		do
+			read '1?git commit -m : '
+			if [ ! $2 ];then
+				color red "Cannot get parameters!"
+				color red "press any key exit terminal"
+				read -n 1
+				exit 1
+			fi
+		done
+
+		if [[ $currentDirectory = $git_gitDirectory ]];then
+			echo "Already in $git_gitDirectory\n"
+		else
+			cd $git_gitDirectory
+			echo "Into Directory:"
+			pwd
+			echo 
+		fi
+
+		git add .
+		git commit -m "$2"
+		git push
+		cd $currentDirectory
+
 	elif [[ $1 == "HELP" ]];then
 		echo "Usage: gitpush [COMMAND]"
 		echo "[COMMAND]:"
