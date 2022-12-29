@@ -20,7 +20,7 @@ function sflpush() {
 
 	if [[ $1 == "CHECK" ]];then
 		echo -e "\033[33m\n\tConfiguration Information : \n\033[0m"
-		echo "\033[34mGit Directory: \033[0m$sfl_sflDirectory"
+		echo "\033[34mGit Directory: \033[0m$sfl_gitDirectory"
 		echo "\033[34mProxy Name: \033[0m$proxy_softwareName"
 		echo "\033[34mProxy Port: \033[0m$proxy_softwareHttpPort"
 		echo "\033[34mProxy $proxy_softwareName PID: \033[0m$softwarePID"
@@ -49,10 +49,10 @@ function sflpush() {
 			fi
 		done
 
-		if [[ $currentDirectory = $sfl_sflDirectory ]];then
-			echo "Already in $sfl_sflDirectory\n"
+		if [[ $currentDirectory = $sfl_gitDirectory ]];then
+			echo "Already in $sfl_gitDirectory\n"
 		else
-			cd $sfl_sflDirectory
+			cd $sfl_gitDirectory
 			echo "Into Directory:"
 			pwd
 			echo 
@@ -94,10 +94,10 @@ function sflpush() {
 			fi
 		done
 
-		if [[ $currentDirectory = $sfl_sflDirectory ]];then
-			echo "Already in $sfl_sflDirectory\n"
+		if [[ $currentDirectory = $sfl_gitDirectory ]];then
+			echo "Already in $sfl_gitDirectory\n"
 		else
-			cd $sfl_sflDirectory
+			cd $sfl_gitDirectory
 			echo "Into Directory:"
 			pwd
 			echo 
